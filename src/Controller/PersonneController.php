@@ -8,10 +8,19 @@ use PhpParser\ErrorHandler\Collecting;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+#[Route('/personne')]
 class PersonneController extends AbstractController
 {
-    #[Route('/personne/add', name: 'personne')]
+    #[Route('/', name: 'personne.list')]
+    public function index(ManagerRegistry $doctrine):Response
+    {
+        $repository = $doctrine->getRepository(Personne::class);
+        $personnes = $repository->findAll();
+        return $this->render('personne/index.html.twig' , [
+            'personnes'=> $personnes
+        ]);
+    }
+    #[Route('/add', name: 'personne.add')]
     public function addPersonne(ManagerRegistry $doctrine): Response
     {
        // $this->getDoctrine(); symfony <=5
