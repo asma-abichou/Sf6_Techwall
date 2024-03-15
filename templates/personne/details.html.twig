@@ -1,0 +1,19 @@
+{% extends 'template.html.twig' %}
+
+
+
+
+
+{% block body %}
+    {{ dump(personne) }}
+<div class="alert alert-success">
+     {{ personne.firstName }}
+     {{ personne.lastName }}
+     {{ personne.age }}
+</div>
+{% endblock %}
+
+{% block title %}
+
+{% endblock %}
+

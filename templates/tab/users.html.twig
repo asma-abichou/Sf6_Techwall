@@ -22,7 +22,7 @@
             <td>{{ user.firstName }}</td>
             <td>{{ user.lastName }}</td>
             <td>{{ user.age }}</td>
-            <td>{{ render(controller('App\\Controller\\FirstController::sayHello', {'firstName': user.firstName, 'lastName': user.lastName})) }}</td>
+            <td>{{ render(path('say.hello' , {'firstName': user.firstName, 'lastName': user.lastName})) }}</td>
         </tr>
     {% endfor %}
 </table>
