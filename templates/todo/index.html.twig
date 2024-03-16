@@ -1,5 +1,9 @@
 {% extends 'template.html.twig' %}
 
+{% block PageTitle %}
+    To Do List
+{% endblock %}
+
 {% block body %}
     {% for message in app.session.flashBag.get('info') %}
         <div class="alert alert-info">
@@ -27,6 +31,4 @@
     {% endfor %}
 </ol>
 {% endblock %}
-{% block title %}
-    To Do List
-{% endblock %}
+

@@ -51,7 +51,7 @@ class PersonneController extends AbstractController
     }
 
     #[Route('/add', name: 'personne.add')]
-    public function addPersonne(ManagerRegistry $doctrine): Response
+    public function add(ManagerRegistry $doctrine): Response
     {
         // $this->getDoctrine(); symfony <=5
         $entityManger = $doctrine->getManager();
@@ -85,4 +85,24 @@ class PersonneController extends AbstractController
             }
            return $this->redirectToRoute('personne.list.all');
     }
+    #[Route('/update/{id}/{lastName}/{firstName}/{age}', name: 'personne.update', methods: ['GET','POST'])]
+    public function update(Personne $personne = null, $firstName, $lastName, $age, ManagerRegistry $doctrine): Response
+    {
+       //verify person to update existe
+         //if person exist update return flash success message
+        if($personne){
+            $personne->setFirstName($firstName);
+            $personne->setLastName($lastName);
+            $personne->setAge($age);
+            $manager = $doctrine->getManager();
+            $manager->persist($personne);
+            $manager->flush();
+            $this->addFlash('success', "La personne a été modifier avec succés");
+        }else {
+            $this->addFlash('error' , "La personne n'exist pas ");
+            //if not return error flash message
+        }
+        return $this->redirectToRoute('personne.list.all');
+    }
+
 }
