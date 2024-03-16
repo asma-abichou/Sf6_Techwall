@@ -1,11 +1,6 @@
 {% extends 'template.html.twig' %}
 
-
-
-
-
 {% block body %}
-    {{ dump(personne) }}
 <div class="alert alert-success">
      {{ personne.firstName }}
      {{ personne.lastName }}
@@ -14,6 +9,6 @@
 {% endblock %}
 
 {% block title %}
-
+      {{ personne.firstName }} {{ personne.lastName }}
 {% endblock %}
 
