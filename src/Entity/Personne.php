@@ -8,7 +8,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+
+
 #[ORM\Entity(repositoryClass: PersonneRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Personne
 {
     #[ORM\Id]
@@ -28,11 +31,17 @@ class Personne
     #[ORM\OneToOne(inversedBy: 'personne', cascade: ['persist', 'remove'])]
     private ?Profile $profile = null;
 
-    #[ORM\ManyToMany(targetEntity: hobby::class)]
+    #[ORM\ManyToMany(targetEntity: Hobby::class)]
     private Collection $hobbies;
 
     #[ORM\ManyToOne(inversedBy: 'personnes')]
     private ?Job $job = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
 
     public function __construct()
     {
@@ -100,7 +109,7 @@ class Personne
         return $this->hobbies;
     }
 
-    public function addHobby(hobby $hobby): static
+    public function addHobby(Hobby $hobby): static
     {
         if (!$this->hobbies->contains($hobby)) {
             $this->hobbies->add($hobby);
@@ -109,7 +118,7 @@ class Personne
         return $this;
     }
 
-    public function removeHobby(hobby $hobby): static
+    public function removeHobby(Hobby $hobby): static
     {
         $this->hobbies->removeElement($hobby);
 
@@ -126,5 +135,45 @@ class Personne
         $this->job = $job;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     */
+    public function onPrePersist()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function onPreUpdate()
+    {
+        $this->updatedAt = new \DateTime();
     }
 }
