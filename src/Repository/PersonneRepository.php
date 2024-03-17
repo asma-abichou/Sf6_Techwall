@@ -35,7 +35,7 @@ class PersonneRepository extends ServiceEntityRepository
     public function statsPersonnesByAgeInterval($ageMin, $ageMax): array
     {
         $qb =  $this->createQueryBuilder('p')
-            ->select('avg(p.age) as ageMoyen count(p.id) as nombrePersonne');
+            ->select('avg(p.age) as ageMoyen, count(p.id) as nombrePersonne');
         $this->addIntervalAge($qb, $ageMin, $ageMax);
         return $qb->getQuery()->getScalarResult();
     }
