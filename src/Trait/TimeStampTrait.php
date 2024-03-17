@@ -8,11 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
 trait TimeStampTrait
 {
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $createdAt;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $updatedAt = null;
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $updatedAt;
 
     public function getCreatedAt(): ?\DateTime
     {
