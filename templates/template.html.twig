@@ -124,7 +124,22 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         {%  block body %}
-                            Template Body
+                            Template
+                        {% for message in app.session.flashBag.get('info') %}
+                            <div class="alert alert-info">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        {% for message in app.session.flashBag.get('success') %}
+                            <div class="alert alert-success">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        {% for message in app.session.flashBag.get('error') %}
+                            <div class="alert alert-danger">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
                         {% endblock %}
                     </div>
                 </div>

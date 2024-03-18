@@ -72,11 +72,15 @@ class PersonneController extends AbstractController
         return $this->render('personne/details.html.twig', ['personne' => $personne]);
     }
 
-    #[Route('/add', name: 'personne.add')]
-    public function add(ManagerRegistry $doctrine, Request $request): Response
+    #[Route('/edit/{id?0}', name: 'personne.edit')]
+    public function add(Personne $personne = null, ManagerRegistry $doctrine, Request $request): Response
     {
-        // $this->getDoctrine(); symfony <=5
-        $personne = new Personne();
+        $new = false;
+        if(!$personne){
+            $new = true;
+            // $this->getDoctrine(); symfony <=5
+            $personne = new Personne();
+        }
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
@@ -86,10 +90,15 @@ class PersonneController extends AbstractController
             //dd($form->getData());
             //if yes add person in the database
             $manager = $entityManger = $doctrine->getManager();
-            $manager ->persist($personne);
+            $manager->persist($personne);
             $manager->flush();
+            if($new){
+                $message = "a été ajouté avec succés";
+            }else {
+                $message = "a été mis a jour avec succés";
+            }
             // display a success message
-            $this->addFlash($personne->getFirstName(), "a été ajouté avec succés " );
+            $this->addFlash('success', $personne->getFirstName(), $message );
             // redirect to list person
             return $this->redirectToRoute('personne.list');
         }else {
