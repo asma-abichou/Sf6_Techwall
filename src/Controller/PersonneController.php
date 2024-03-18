@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\Personne;
 use App\Form\PersonneType;
 use Doctrine\Persistence\ManagerRegistry;
-use PhpParser\ErrorHandler\Collecting;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 #[Route('/personne')]
 class PersonneController extends AbstractController
@@ -73,18 +73,31 @@ class PersonneController extends AbstractController
     }
 
     #[Route('/add', name: 'personne.add')]
-    public function add(ManagerRegistry $doctrine): Response
+    public function add(ManagerRegistry $doctrine, Request $request): Response
     {
         // $this->getDoctrine(); symfony <=5
-        $entityManger = $doctrine->getManager();
         $personne = new Personne();
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
-        //execute transaction
-        return $this->render('personne/add-personne.html.twig', [
-            'form' => $form->createView()
-        ]);
+        $form->handleRequest($request);
+        //if form is subbmited
+        if($form->isSubmitted()){
+            //dd($form->getData());
+            //if yes add person in the database
+            $manager = $entityManger = $doctrine->getManager();
+            $manager ->persist($personne);
+            $manager->flush();
+            // display a success message
+            $this->addFlash($personne->getFirstName(), "a été ajouté avec succés " );
+            // redirect to list person
+            return $this->redirectToRoute('personne.list');
+        }else {
+            // if not display form
+            return $this->render('personne/add-personne.html.twig', [
+                'form' => $form->createView()
+            ]);
+        }
     }
 
     #[Route('/delete/{id}', name: 'personne.delete')]
