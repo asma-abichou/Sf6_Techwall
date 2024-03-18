@@ -80,6 +80,10 @@ class PersonneController extends AbstractController
             $new = true;
             // $this->getDoctrine(); symfony <=5
             $personne = new Personne();
+            $personne->setCreatedAt(new \DateTime());
+            $personne->setUpdatedAt(new \DateTime());
+            $doctrine->getManager()->persist($personne);
+            $doctrine->getManager()->flush();
         }
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
@@ -89,8 +93,7 @@ class PersonneController extends AbstractController
         if($form->isSubmitted()){
             //dd($form->getData());
             //if yes add person in the database
-            $manager = $entityManger = $doctrine->getManager();
-            $manager->persist($personne);
+            $manager = $doctrine->getManager();
             $manager->flush();
             if($new){
                 $message = "a été ajouté avec succés";

@@ -6,6 +6,8 @@ use App\Entity\Hobby;
 use App\Entity\Job;
 use App\Entity\Personne;
 use App\Entity\Profile;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Console\Command\ClearCache\EntityRegionCommand;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -27,19 +29,27 @@ class PersonneType extends AbstractType
                 'widget' => 'single_text'
             ])
             ->add('profile', EntityType::class, [
+                'expanded'=>true,
+                'multiple'=>true,
                 'class' => Profile::class,
                 'choice_label' => 'url',
             ])
             ->add('hobbies', EntityType::class, [
+                'expanded'=>false,
                 'class' => Hobby::class,
                 'choice_label' => 'designation',
                 'multiple' => true,
+                'query_builder' => function (EntityRepository $er) {
+                return $er->createQueryBuilder('h')
+                    -> orderBy('h.designation', 'ASC');
+                },
+
             ])
             ->add('job', EntityType::class, [
                 'class' => Job::class,
                 'choice_label' => 'designation',
             ])
-            ->add('editer', SubmitType::class)
+            ->add('Editer', SubmitType::class)
         ;
     }
 
