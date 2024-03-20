@@ -6,12 +6,12 @@ use App\Entity\Personne;
 use App\Form\PersonneType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Doctrine\Common\Collections\Collection;
 
 #[Route('/personne')]
 class PersonneController extends AbstractController
@@ -81,12 +81,8 @@ class PersonneController extends AbstractController
         $new = false;
         if(!$personne){
             $new = true;
-            // $this->getDoctrine(); symfony <=5
+            $this->getDoctrine();
             $personne = new Personne();
-            $personne->setCreatedAt(new \DateTime());
-            $personne->setUpdatedAt(new \DateTime());
-            $doctrine->getManager()->persist($personne);
-            $doctrine->getManager()->flush();
         }
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
@@ -95,46 +91,23 @@ class PersonneController extends AbstractController
         //if form is subbmited
         if($form->isSubmitted()){
             //dd($form->getData());
-            //if yes add person in the database
-            $photo = $form->get('photo')->getData();
-
-            // this condition is needed because the 'brochure' field is not required
-            // so the PDF file must be processed only when a file is uploaded
-                if ($photo) {
-                $originalFilename = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$photo->guessExtension();
-
-                // Move the file to the directory where brochures are stored
-                try {
-                    $photo->move(
-                        $this->getParameter('personne_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
-                }
-
-                // updates the 'brochureFilename' property to store the PDF file name
-                // instead of its contents
-                $personne->setImage($newFilename);
-                }
-            // ... persist the $product variable or any other work
+            // //if yes add person in the database
             $manager = $doctrine->getManager();
-
+            $manager->persist($personne);
             $manager->flush();
             if($new){
-            $message = "a été ajouté avec succés";
-            }else {
-            $message = "a été mis a jour avec succés";
+                $message = "a été ajouté avec succés";
+            }
+            else {
+                $message = "a été mis a jour avec succés";
             }
             // display a success message
             $this->addFlash('success', $personne->getFirstName(), $message );
-            // redirect to list person
+            /// redirect to list person return
             return $this->redirectToRoute('personne.list');
-        }else {
-            // if not display form
+        }
+        else {
+            // if not display form return
             return $this->render('personne/add-personne.html.twig', [
                 'form' => $form->createView()
             ]);
