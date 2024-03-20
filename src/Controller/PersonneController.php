@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Personne;
 use App\Form\PersonneType;
+use App\Service\Helpers;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +18,10 @@ use Doctrine\Common\Collections\Collection;
 #[Route('/personne')]
 class PersonneController extends AbstractController
 {
+    public function __construct( private LoggerInterface $logger,
+                                 private Helpers $helper)
+    {
+    }
     #[Route('/', name: 'personne.list')]
     public function index(ManagerRegistry $doctrine): Response
     {
@@ -50,6 +56,9 @@ class PersonneController extends AbstractController
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {
+        $helper = new Helpers();
+        echo $helper->sayCC();
+       // dd($helpers->sayCC());
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
         $nbrePage = ceil($nbPersonne / $nbre);
@@ -75,43 +84,44 @@ class PersonneController extends AbstractController
         return $this->render('personne/details.html.twig', ['personne' => $personne]);
     }
 
-    #[Route('/edit/{id?0}', name: 'personne.edit')]
-    public function add(Personne $personne = null, ManagerRegistry $doctrine, Request $request, SluggerInterface $slugger): Response
+    #[Route('/personne/add', name: 'personne.add')]
+    public function addPerson(ManagerRegistry $doctrine, Request $request, SluggerInterface $slugger): Response
     {
-        $new = false;
-        if(!$personne){
-            $new = true;
-            $this->getDoctrine();
-            $personne = new Personne();
-        }
+        $personne = new Personne();
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
         $form->handleRequest($request);
-        //if form is subbmited
         if($form->isSubmitted() && $form->isValid()){
-            //dd($form->getData());
-            // //if yes add person in the database
+            $manager = $this->getDoctrine()->getManager();
+            $manager->persist($personne);
+            $manager->flush();
+            $this->addFlash('success', 'Personne ajoutée avec succès');
+            return $this->redirectToRoute('personne.list');
+        }
+        return $this->render('personne/add-personne.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+// Separate route for edit person
+    #[Route('/personne/edit/{id}', name: 'personne.edit')]
+    public function editPerson(Personne $personne, ManagerRegistry $doctrine, Request $request, SluggerInterface $slugger): Response
+    {
+        $form = $this->createForm(PersonneType::class, $personne);
+        $form->remove('createdAt');
+        $form->remove('updatedAt');
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
             $manager = $doctrine->getManager();
             $manager->persist($personne);
             $manager->flush();
-            if($new){
-                $message = "a été ajouté avec succés";
-            }
-            else {
-                $message = "a été mis a jour avec succés";
-            }
-            // display a success message
-            $this->addFlash('success', $personne->getFirstName(), $message );
-            /// redirect to list person return
+            $this->addFlash('success', 'Personne modifiée avec succès');
             return $this->redirectToRoute('personne.list');
         }
-        else {
-            // if not display form return
-            return $this->render('personne/add-personne.html.twig', [
-                'form' => $form->createView()
-            ]);
-        }
+        return $this->render('personne/add-personne.html.twig', [
+            'form' => $form->createView()
+        ]);
     }
 
     #[Route('/delete/{id}', name: 'personne.delete')]

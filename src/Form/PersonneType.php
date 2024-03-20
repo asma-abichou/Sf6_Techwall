@@ -29,11 +29,14 @@ class PersonneType extends AbstractType
                 'widget' => 'single_text'
             ])
             ->add('profile', EntityType::class, [
-                'expanded'=>true,
+                'expanded'=>false,
                 'multiple'=>false,
                 'required'=>false,
                 'class' => Profile::class,
                 'choice_label' => 'url',
+                'attr' =>[
+                    'class'=>'select2'
+                ]
             ])
             ->add('hobbies', EntityType::class, [
                 'expanded'=>false,
@@ -44,11 +47,17 @@ class PersonneType extends AbstractType
                 return $er->createQueryBuilder('h')
                     -> orderBy('h.designation', 'ASC');
                 },
+                'attr' =>[
+                    'class'=>'select2'
+                ],
 
             ])
             ->add('job', EntityType::class, [
                 'class' => Job::class,
                 'choice_label' => 'designation',
+                'attr' =>[
+                    'class'=>'select2'
+                ],
             ])
             ->add('Editer', SubmitType::class)
         ;
