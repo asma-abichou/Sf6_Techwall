@@ -12,6 +12,7 @@
         {% endblock %}
     </title>
     <link href="{{ asset('assets/css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ asset('node_modules/select2/dist/css/select2.min.css') }}" rel="stylesheet" />
     {% block stylesheets %}
     {% endblock %}
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -120,29 +121,26 @@
                         Template
                     {% endblock %}
                 </h1>
-
                 <div class="card mb-4">
                     <div class="card-body">
-                        {%  block body %}
-                            Template
-                        {% for message in app.flashes('info') %}
+                        {% for message in app.session.flashBag.get('info') %}
                             <div class="alert alert-info">
                                 {{ message }}
                             </div>
                         {% endfor %}
-                        {% for message in app.flashes('success') %}
+                        {% for message in app.session.flashBag.get('success') %}
                             <div class="alert alert-success">
                                 {{ message }}
                             </div>
                         {% endfor %}
-                        {% for message in app.flashes('error') %}
+                        {% for message in app.session.flashBag.get('error') %}
                             <div class="alert alert-danger">
                                 {{ message }}
                             </div>
                         {% endfor %}
-                        {% endblock %}
-                    </div>
-                </div>
+                        {%  block body %}
+                            Template
+                       {% endblock %}
                 <div style="height: 100vh"></div>
                 <div class="card mb-4"><div class="card-body">When scrolling, the navigation stays at the top of the page. This is the end of the static navigation demo.</div></div>
             </div>
@@ -163,6 +161,9 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="{{ asset('assets/js/scripts.js') }}"></script>
+<script src="{{ asset('node_modules/jquery/dist/jquery.js') }}"></script>
+<script src="{{ asset('node_modules/select2/dist/js/select2.min.js') }}"></script>
+
 {% block javascripts %}
 {% endblock %}
 </body>

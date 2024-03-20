@@ -89,7 +89,7 @@ class PersonneController extends AbstractController
         $form->remove('updatedAt');
         $form->handleRequest($request);
         //if form is subbmited
-        if($form->isSubmitted()){
+        if($form->isSubmitted() && $form->isValid()){
             //dd($form->getData());
             // //if yes add person in the database
             $manager = $doctrine->getManager();
