@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Personne;
 use App\Form\PersonneType;
 use App\Service\Helpers;
+use App\Service\MailerService;
+use App\Service\UploaderService;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -84,47 +86,96 @@ class PersonneController extends AbstractController
         return $this->render('personne/details.html.twig', ['personne' => $personne]);
     }
 
-    #[Route('/personne/add', name: 'personne.add')]
-    public function addPerson(ManagerRegistry $doctrine, Request $request, SluggerInterface $slugger): Response
+    #[Route('/edit/{id?0}', name: 'personne.edit')]
+    public function addPersonne(
+        Personne $personne = null,
+        ManagerRegistry $doctrine,
+        Request $request,
+        UploaderService $uploaderService,
+        MailerService $mailer
+    ): Response
     {
-        $personne = new Personne();
+
+        $new = false;
+        //$this->getDoctrine() : Version Sf <= 5
+        if (!$personne) {
+            $new = true;
+            $personne = new Personne();
+        }
+        // $personne est l'image de notre formulaire
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
+        // Mn formulaire va aller traiter la requete
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()){
-            $manager = $this->getDoctrine()->getManager();
+        //Est ce que le formulaire a été soumis
+        if($form->isSubmitted() && $form->isValid()) {
+            // si oui,
+            // on va ajouter l'objet personne dans la base de données
+            if($new) {
+                $message = " a été ajouté avec succès";
+            } else {
+                $message = " a été mis à jour avec succès";
+            }
+            $manager = $doctrine->getManager();
             $manager->persist($personne);
+
             $manager->flush();
-            $this->addFlash('success', 'Personne ajoutée avec succès');
-            return $this->redirectToRoute('personne.list');
+            $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
+            $this->addFlash('success', $personne->getLastName() . ' a été mis à jour avec succès');
+            $mailer->sendEmail(content: $mailMessage);
+            $this->addFlash('success',$personne->getName(). $message );
+            // Rediriger verts la liste des personne
+           return $this->redirectToRoute('personne.list');
+        } else {
+            //Sinon
+            //On affiche notre formulaire
+            return $this->render('personne/add-personne.html.twig', [
+                'form' => $form->createView()
+            ]);
         }
-        return $this->render('personne/add-personne.html.twig', [
-            'form' => $form->createView()
-        ]);
+
     }
 
-// Separate route for edit person
-    #[Route('/personne/edit/{id}', name: 'personne.edit')]
-    public function editPerson(Personne $personne, ManagerRegistry $doctrine, Request $request, SluggerInterface $slugger): Response
+    /*#[Route('/edit/{id?0}', name: 'personne.edit')]
+    public function editPersonne(Personne $personne = null,
+                                 ManagerRegistry $doctrine,
+                                 Request $request,
+                                 UploaderService $uploaderService,
+                                 MailerService $mailer): Response
     {
+        $new = false;
+
+        if (!$personne) {
+            $new = true;
+            $personne = new Personne();
+        }
+
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
+
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid()){
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $manager = $doctrine->getManager();
             $manager->persist($personne);
             $manager->flush();
-            $this->addFlash('success', 'Personne modifiée avec succès');
+
+            $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
+            $this->addFlash('success', $personne->getLastName() . ' a été mis à jour avec succès');
+            $mailer->sendEmail(content: $mailMessage);
+
             return $this->redirectToRoute('personne.list');
         }
-        return $this->render('personne/add-personne.html.twig', [
-            'form' => $form->createView()
-        ]);
-    }
 
-    #[Route('/delete/{id}', name: 'personne.delete')]
+        return $this->render('personne/add-personne.html.twig', [
+            'form' => $form->createView(),
+            'new' => $new,
+        ]);
+    }*/
+
+        #[Route('/delete/{id}', name: 'personne.delete')]
     public function delete(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
     {
        //get person to delete

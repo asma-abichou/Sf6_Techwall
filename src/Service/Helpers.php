@@ -2,17 +2,16 @@
 
 namespace App\Service;
 
+use Psr\Log\LoggerInterface;
+
 class Helpers
 {
 
-    private $logger;
-    public function __construct($logger)
-    {
+    public function __construct(private LoggerInterface $logger) {
     }
-    public function sayCC():String{
-        $this->logger->info("je dis cc");
-        return "cc";
-
+    public function sayCc(): string {
+        $this->logger->info('Je dis cc');
+        return 'cc';
     }
 
 }
