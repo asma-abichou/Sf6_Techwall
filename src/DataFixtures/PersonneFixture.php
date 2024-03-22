@@ -12,11 +12,11 @@ class PersonneFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
-        for($i =0; $i < 100; $i++){
+        for ($i=0; $i < 100; $i++) {
             $personne = new Personne();
-            $personne->setFirstName($faker->firstName);
+            $personne->setFirstname($faker->firstName);
             $personne->setLastName($faker->lastName);
-            $personne->setAge($faker->numberBetween(18,65));
+            $personne->setAge($faker->numberBetween(18, 65));
 
             $manager->persist($personne);
         }

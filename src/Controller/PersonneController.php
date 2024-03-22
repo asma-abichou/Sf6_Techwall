@@ -25,7 +25,7 @@ class PersonneController extends AbstractController
                                  private Helpers $helper)
     {
     }
-    #[Route('/', name: 'personne.list')]
+    #[Route('/', name: 'personne.list', methods: 'GET')]
     public function index(ManagerRegistry $doctrine): Response
     {
         $repository = $doctrine->getRepository(Personne::class);
