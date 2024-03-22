@@ -5,6 +5,9 @@
      {{ personne.firstName }}
      {{ personne.lastName }}
      {{ personne.age }}
+      {% if app.user %}
+      <p>Created At: {{ app.user.email }}</p>
+      {% endif %}
 </div>
 {% endblock %}
 

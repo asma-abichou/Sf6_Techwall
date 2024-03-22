@@ -104,7 +104,6 @@ class PersonneController extends AbstractController
         MailerService $mailer
     ): Response
     {
-
         $new = false;
         //$this->getDoctrine() : Version Sf <= 5
         if (!$personne) {
@@ -123,6 +122,7 @@ class PersonneController extends AbstractController
             // on va ajouter l'objet personne dans la base de données
             if($new) {
                 $message = " a été ajouté avec succès";
+                $personne->setCreatedBy($this->getUser());
             } else {
                 $message = " a été mis à jour avec succès";
             }
@@ -145,46 +145,7 @@ class PersonneController extends AbstractController
         }
 
     }
-
-    /*#[Route('/edit/{id?0}', name: 'personne.edit')]
-    public function editPersonne(Personne $personne = null,
-                                 ManagerRegistry $doctrine,
-                                 Request $request,
-                                 UploaderService $uploaderService,
-                                 MailerService $mailer): Response
-    {
-        $new = false;
-
-        if (!$personne) {
-            $new = true;
-            $personne = new Personne();
-        }
-
-        $form = $this->createForm(PersonneType::class, $personne);
-        $form->remove('createdAt');
-        $form->remove('updatedAt');
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $manager = $doctrine->getManager();
-            $manager->persist($personne);
-            $manager->flush();
-
-            $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
-            $this->addFlash('success', $personne->getLastName() . ' a été mis à jour avec succès');
-            $mailer->sendEmail(content: $mailMessage);
-
-            return $this->redirectToRoute('personne.list');
-        }
-
-        return $this->render('personne/add-personne.html.twig', [
-            'form' => $form->createView(),
-            'new' => $new,
-        ]);
-    }*/
-
-        #[Route('/delete/{id}', name: 'personne.delete')]
+    #[Route('/delete/{id}', name: 'personne.delete')]
     public function delete(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
     {
        //get person to delete

@@ -33,14 +33,17 @@ class Personne
     #[ORM\Column(length: 50)]
     private ?string $lastName = null;
 
-    #[ORM\OneToOne(inversedBy: 'personne', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: Profile::class ,inversedBy: 'personne', cascade: ['persist', 'remove'])]
     private ?Profile $profile = null;
 
     #[ORM\ManyToMany(targetEntity: Hobby::class)]
     private Collection $hobbies;
 
-    #[ORM\ManyToOne(inversedBy: 'personnes')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'personnes')]
     private ?Job $job = null;
+
+    #[ORM\ManyToOne(inversedBy: 'personnes')]
+    private ?User $createdBy = null;
 
     public function __construct()
     {
@@ -135,5 +138,18 @@ class Personne
 
         return $this;
     }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
 
 }
