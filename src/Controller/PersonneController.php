@@ -7,6 +7,7 @@ use App\Form\PersonneType;
 use App\Service\Helpers;
 use App\Service\MailerService;
 use App\Service\UploaderService;
+use App\Service\PdfService;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +43,14 @@ class PersonneController extends AbstractController
             'personnes' => $personnes
         ]);
     }
+    #[Route('/pdf/{id}', name: 'personne.pdf')]
+    public function generatePdfPersonne(Personne $personne = null, PdfService $pdf) {
+        $html = $this->render('personne/details.html.twig',
+            [
+                'personne' => $personne
+            ]);
+        $pdf->showPdfFile($html);
+    }
     #[Route('/stats/age/{ageMin}/{ageMax}', name: 'personne.list.age')]
     public function statsPersonneByAge(ManagerRegistry $doctrine, $ageMin, $ageMax): Response
     {
@@ -58,8 +67,8 @@ class PersonneController extends AbstractController
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {
-        $helper = new Helpers();
-        echo $helper->sayCC();
+        //$helper = new Helpers();
+        //echo $helper->sayCC();
        // dd($helpers->sayCC());
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
