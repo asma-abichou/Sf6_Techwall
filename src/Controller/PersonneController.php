@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\Common\Collections\Collection;
 
@@ -64,11 +65,11 @@ class PersonneController extends AbstractController
         ]);
     }
 
-    #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all')]
+    #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {
-        //$helper = new Helpers();
-        //echo $helper->sayCC();
+       /* $helper = new Helpers();
+        echo $helper->sayCC(); */
        // dd($helpers->sayCC());
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
@@ -122,7 +123,7 @@ class PersonneController extends AbstractController
             // on va ajouter l'objet personne dans la base de données
             if($new) {
                 $message = " a été ajouté avec succès";
-                $personne->setCreatedBy($this->getUser());
+                //$personne->setCreatedBy($this->getUser());
             } else {
                 $message = " a été mis à jour avec succès";
             }
@@ -130,9 +131,9 @@ class PersonneController extends AbstractController
             $manager->persist($personne);
 
             $manager->flush();
-            $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
+           // $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
             $this->addFlash('success', $personne->getLastName() . ' a été mis à jour avec succès');
-            $mailer->sendEmail(content: $mailMessage);
+            //$mailer->sendEmail(content: $mailMessage);
             $this->addFlash('success',$personne->getName(). $message );
             // Rediriger verts la liste des personne
            return $this->redirectToRoute('personne.list');

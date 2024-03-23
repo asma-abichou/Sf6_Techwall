@@ -6,11 +6,13 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -36,13 +38,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $username;
 
-    #[ORM\OneToMany(targetEntity: Personne::class, mappedBy: 'createdBy')]
-    private Collection $personne;
 
     public function __construct()
     {
-        $this->personnes = new ArrayCollection();
-        $this->personne = new ArrayCollection();
+        $this->hobbies = new ArrayCollection();
     }
 
 
@@ -147,28 +146,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPersonne(): Collection
     {
         return $this->personne;
-    }
-
-    public function addPersonne(Personne $personne): static
-    {
-        if (!$this->personne->contains($personne)) {
-            $this->personne->add($personne);
-            $personne->setCreatedBy($this);
-        }
-
-        return $this;
-    }
-
-    public function removePersonne(Personne $personne): static
-    {
-        if ($this->personne->removeElement($personne)) {
-            // set the owning side to null (unless already changed)
-            if ($personne->getCreatedBy() === $this) {
-                $personne->setCreatedBy(null);
-            }
-        }
-
-        return $this;
     }
 
 

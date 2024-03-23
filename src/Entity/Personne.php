@@ -42,9 +42,6 @@ class Personne
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'personnes')]
     private ?Job $job = null;
 
-    #[ORM\ManyToOne(inversedBy: 'personnes')]
-    private ?User $createdBy = null;
-
     public function __construct()
     {
         $this->hobbies = new ArrayCollection();
@@ -138,18 +135,5 @@ class Personne
 
         return $this;
     }
-
-    public function getCreatedBy(): ?User
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?User $createdBy): static
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
 
 }
