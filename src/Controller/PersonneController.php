@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Personne;
 use App\Form\PersonneType;
+use App\Repository\PersonneRepository;
 use App\Service\Helpers;
 use App\Service\MailerService;
 use App\Service\UploaderService;
@@ -63,6 +64,21 @@ class PersonneController extends AbstractController
             'ageMin'=>$ageMin,
             'ageMax'=>$ageMax
         ]);
+    }
+
+    #[Route('/search', name: 'personne.search')]
+    public function search(Request $request, PersonneRepository $personneRepository): Response
+    {
+        $querySearch = $request->query->get('searchQuery');
+        // dd($querySearch);
+         $personnes = $personneRepository->searchByName($querySearch);
+        dd($querySearch);
+        if ($querySearch === '') {
+            return $this->redirectToRoute('personne.list.all'); }
+        if (empty($personnes)) {
+            $this->addFlash('error', 'No results found for the search.');
+        }
+        return $this->render('personne/index.html.twig', [ 'personnes' => $personnes, ]);
     }
 
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
