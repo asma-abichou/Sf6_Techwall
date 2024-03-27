@@ -54,11 +54,11 @@ class PersonneType extends AbstractType
 
             ])
             ->add('job', EntityType::class, [
+                'required' => false,
                 'class' => Job::class,
-                'choice_label' => 'designation',
-                'attr' =>[
-                    'class'=>'select2'
-                ],
+                'attr' => [
+                    'class' => 'select2'
+                ]
             ])
             ->add('Editer', SubmitType::class)
         ;

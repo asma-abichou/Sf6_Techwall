@@ -39,7 +39,7 @@ class Personne
     #[ORM\ManyToMany(targetEntity: Hobby::class)]
     private Collection $hobbies;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'personnes')]
+    #[ORM\ManyToOne(targetEntity: Job::class, inversedBy: 'personnes')]
     private ?Job $job = null;
 
     public function __construct()

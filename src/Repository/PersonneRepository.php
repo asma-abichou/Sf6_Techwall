@@ -45,12 +45,13 @@ class PersonneRepository extends ServiceEntityRepository
             ->setParameter('ageMin', $ageMin)
             ->setParameter('ageMax', $ageMax);
     }
-    public function searchByName($name, $page = 1, $limit = 10){
-        $query = $this->createQueryBuilder('p')
-                      ->andwhere('p.firstname LIKE: :name')
-                      ->setParameter('name','%'.$name.'%')
-                      ->getQuery();
+    public function searchByName($name)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.firstName LIKE :name OR p.lastName LIKE :name')
+            ->setParameter('name', '%'.$name.'%');
 
+        return $qb->getQuery()->getResult();
 
     }
 

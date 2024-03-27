@@ -72,7 +72,7 @@ class PersonneController extends AbstractController
         $querySearch = $request->query->get('searchQuery');
         // dd($querySearch);
          $personnes = $personneRepository->searchByName($querySearch);
-        dd($querySearch);
+        //dd($querySearch);
         if ($querySearch === '') {
             return $this->redirectToRoute('personne.list.all'); }
         if (empty($personnes)) {
@@ -113,14 +113,9 @@ class PersonneController extends AbstractController
     }
 
     #[Route('/edit/{id?0}', name: 'personne.edit')]
-    public function addPersonne(
-        Personne $personne = null,
-        ManagerRegistry $doctrine,
-        Request $request,
-        UploaderService $uploaderService,
-        MailerService $mailer
-    ): Response
+    public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine, Request $request): Response
     {
+
         $new = false;
         //$this->getDoctrine() : Version Sf <= 5
         if (!$personne) {
@@ -131,10 +126,12 @@ class PersonneController extends AbstractController
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
+
         // Mn formulaire va aller traiter la requete
         $form->handleRequest($request);
         //Est ce que le formulaire a été soumis
         if($form->isSubmitted() && $form->isValid()) {
+
             // si oui,
             // on va ajouter l'objet personne dans la base de données
             if($new) {
@@ -150,17 +147,14 @@ class PersonneController extends AbstractController
            // $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
             $this->addFlash('success', $personne->getLastName() . ' a été mis à jour avec succès');
             //$mailer->sendEmail(content: $mailMessage);
-            $this->addFlash('success',$personne->getName(). $message );
+            $this->addFlash('success',$personne->getFirstName(). $message );
             // Rediriger verts la liste des personne
            return $this->redirectToRoute('personne.list');
-        } else {
-            //Sinon
-            //On affiche notre formulaire
+        }
+        //dd($form->createView());
             return $this->render('personne/add-personne.html.twig', [
                 'form' => $form->createView()
             ]);
-        }
-
     }
     #[Route('/delete/{id}', name: 'personne.delete')]
     public function delete(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
