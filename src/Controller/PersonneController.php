@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\Common\Collections\Collection;
 
-#[Route('/personne')]
+#[Route('personne'), IsGranted('ROLE_USER')]
 class PersonneController extends AbstractController
 {
     public function __construct( private LoggerInterface $logger,
@@ -115,7 +115,7 @@ class PersonneController extends AbstractController
     #[Route('/edit/{id?0}', name: 'personne.edit')]
     public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine, Request $request): Response
     {
-
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $new = false;
         //$this->getDoctrine() : Version Sf <= 5
         if (!$personne) {
@@ -156,7 +156,7 @@ class PersonneController extends AbstractController
                 'form' => $form->createView()
             ]);
     }
-    #[Route('/delete/{id}', name: 'personne.delete')]
+    #[Route('/delete/{id}', name: 'personne.delete'), IsGranted('ROLE_ADMIN')]
     public function delete(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
     {
        //get person to delete
