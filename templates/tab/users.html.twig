@@ -1,29 +1,35 @@
 {% extends 'template.html.twig' %}
+
 {% block title %}
-    List Of Users
+    Users
 {% endblock %}
 
- {%  block PageTitle %}
-     Users List
- {% endblock %}
-
+{% block PageTitle %}
+    Users
+{% endblock %}
 
 {% block body %}
-    {{ include('fragments/date-jour.html.twig') }}
-<table class="table">
-    <tr class="table-{% if (users |length is divisible by(3)) %}danger{% else %}warning{% endif %}">
-        <td>First Name</td>
-        <td>Last Name</td>
-        <td>Age</td>
-        <td>Message</td>
-    </tr>
-    {% for user in users %}
-        <tr>
-            <td>{{ user.firstName }}</td>
-            <td>{{ user.lastName }}</td>
-            <td>{{ user.age }}</td>
-            <td>{{ render(path('say.hello' , {'firstName': user.firstName, 'lastName': user.lastName})) }}</td>
+    {{ include('fragments/date-jour.html.twig')}}
+    <div class="alert alert-warning">
+        <a href="{{ path('tab', {nb : 7 }) }}"> Stats Table</a>
+    </div>
+    <table class="table">
+        <tr class="table-active">
+            <td>First name</td>
+            <td>Last name</td>
+            <td>Age</td>
+            <td>Message</td>
         </tr>
-    {% endfor %}
-</table>
+        {% for user in users %}
+            <tr class="table-{% if loop.index is odd %}danger{% else %}warning{% endif %}">
+                <td>{{ user.firstName }}</td>
+                <td>{{ user.lastName }}</td>
+                <td>{{ user.age }}</td>
+                <td>
+
+                    {{ render(controller('App\\Controller\\FirstController::sayHello',{firstName: user.firstName, lastName: user.lastName })) }}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
