@@ -6,8 +6,6 @@ use App\Entity\Personne;
 use App\Form\PersonneType;
 use App\Repository\PersonneRepository;
 use App\Service\Helpers;
-use App\Service\MailerService;
-use App\Service\UploaderService;
 use App\Service\PdfService;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
@@ -84,13 +82,9 @@ class PersonneController extends AbstractController
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {
-       /* $helper = new Helpers();
-        echo $helper->sayCC(); */
-       // dd($helpers->sayCC());
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
         $nbrePage = ceil($nbPersonne / $nbre);
-        //dd(ceil($nbPersonne / $nbre));
         $personnes = $repository->findBy([], [], $nbre, ($page - 1) * $nbre);
         return $this->render('personne/index.html.twig', [
             'personnes' => $personnes,
@@ -108,7 +102,6 @@ class PersonneController extends AbstractController
             $this->addFlash('error', "La personne n'existe pas");
             return $this->redirectToRoute('personne.list');
         }
-
         return $this->render('personne/details.html.twig', ['personne' => $personne]);
     }
 
@@ -117,26 +110,18 @@ class PersonneController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $new = false;
-        //$this->getDoctrine() : Version Sf <= 5
         if (!$personne) {
             $new = true;
             $personne = new Personne();
         }
-        // $personne est l'image de notre formulaire
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
-
-        // Mn formulaire va aller traiter la requete
         $form->handleRequest($request);
-        //Est ce que le formulaire a été soumis
         if($form->isSubmitted() && $form->isValid()) {
 
-            // si oui,
-            // on va ajouter l'objet personne dans la base de données
             if($new) {
                 $message = " a été ajouté avec succès";
-                //$personne->setCreatedBy($this->getUser());
             } else {
                 $message = " a été mis à jour avec succès";
             }
@@ -144,14 +129,10 @@ class PersonneController extends AbstractController
             $manager->persist($personne);
 
             $manager->flush();
-           // $mailMessage = $personne->getFirstName() . ' ' . $personne->getLastName() . ' a été mis à jour avec succès';
             $this->addFlash('success', $personne->getLastName() . ' a été mis à jour avec succès');
-            //$mailer->sendEmail(content: $mailMessage);
             $this->addFlash('success',$personne->getFirstName(). $message );
-            // Rediriger verts la liste des personne
            return $this->redirectToRoute('personne.list');
         }
-        //dd($form->createView());
             return $this->render('personne/add-personne.html.twig', [
                 'form' => $form->createView()
             ]);
