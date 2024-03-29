@@ -35,12 +35,18 @@
                                         </tr>
                                     </tfoot>
                                     <tbody>
-                                    {% for person in personne %}
+                                    {% for person in personnes %}
                                         <tr>
                                             <td>{{ person.firstName }}</td>
                                             <td>{{ person.lastName }}</td>
                                             <td>{{ person.age }}</td>
-                                            <td>{{ person.job }}</td>
+                                            <td>
+                                                {% if person.job %}
+                                                    {{ person.job.designation }}
+                                                 {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>
@@ -66,5 +72,4 @@
 {% block javascripts %}
      <script src="{{ asset('assets/demo/datatables-demo.js') }}" crossorigin="anonymous"></script>
     <script src="{{ asset('assets/js/datatables-simple-demo.js') }}"></script>
-
 {% endblock %}
