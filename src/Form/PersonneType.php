@@ -60,6 +60,7 @@ class PersonneType extends AbstractType
                     'class' => 'select2'
                 ]
             ])
+
             ->add('Editer', SubmitType::class)
         ;
     }

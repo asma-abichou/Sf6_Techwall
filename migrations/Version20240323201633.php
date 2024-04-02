@@ -27,7 +27,7 @@ final class Version20240323201633 extends AbstractMigration
         $this->addSql('ALTER TABLE personne ADD CONSTRAINT FK_FCEC9EFB03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
         $this->addSql('ALTER TABLE personne ADD CONSTRAINT FK_FCEC9EFBE04EA9 FOREIGN KEY (job_id) REFERENCES user (id)');
         $this->addSql('CREATE INDEX IDX_FCEC9EFB03A8386 ON personne (created_by_id)');
-        $this->addSql('ALTER TABLE profile CHANGE created_at created_at DATETIME NOT NULL, CHANGE updated_at updated_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE profile CHANGE created_at created_at DATETIME  NULL, CHANGE updated_at updated_at DATETIME  NULL');
         $this->addSql('ALTER TABLE user ADD created_by_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE user ADD CONSTRAINT FK_8D93D649B03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
         $this->addSql('CREATE INDEX IDX_8D93D649B03A8386 ON user (created_by_id)');

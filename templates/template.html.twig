@@ -23,6 +23,7 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
 <body>
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="index.html">CvTech</a>
@@ -51,6 +52,7 @@
         </li>
     </ul>
 </nav>
+{% endif %}
 <div id="layoutSidenav">
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <div id="layoutSidenav_nav">
@@ -110,7 +112,6 @@
                         </a>#}
                     </div>
                 </div>
-
                 <div class="sb-sidenav-footer">
                     <div class="small">Logged in as:</div>
                     {% if app.user %}
@@ -150,6 +151,8 @@
                         {%  block body %}
                             Template
                        {% endblock %}
+                    </div>
+                </div>
                 <div style="height: 100vh"></div>
                 <div class="card mb-4"><div class="card-body">When scrolling, the navigation stays at the top of the page. This is the end of the static navigation demo.</div></div>
             </div>
