@@ -45,14 +45,28 @@ class PersonneRepository extends ServiceEntityRepository
             ->setParameter('ageMin', $ageMin)
             ->setParameter('ageMax', $ageMax);
     }
-    public function searchByName($name)
+    public function searchByName($name, $limit , $offset)
     {
         $qb = $this->createQueryBuilder('p')
             ->where('p.firstName LIKE :name OR p.lastName LIKE :name')
-            ->setParameter('name', '%'.$name.'%');
-
+            ->setParameter('name', '%'.$name.'%')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
         return $qb->getQuery()->getResult();
 
+    }
+    public function countByName($name)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(p)')
+            ->where('p.firstName LIKE :name OR p.lastName LIKE :name')
+            ->setParameter('name', '%'.$name.'%');
+    // Execute the query and retrieve the single scalar result representing the count of matching records
+        $count =  $qb->getQuery()->getSingleScalarResult();
+        if ($count === 0) {
+            return null;
+        }
+        return $count;
     }
 //    public function findOneBySomeField($value): ?Personne
 //    {

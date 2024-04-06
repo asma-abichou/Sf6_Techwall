@@ -51,7 +51,7 @@ class PersonneController extends AbstractController
             ]);
         $pdf->showPdfFile($html);
     }
-    #[Route('/stats/age/{ageMin}/{ageMax}', name: 'personne.list.age')]
+    #[Route('/stats/age/{ageMin}/{ageMax}', name: 'personne.list.stats.age')]
     public function statsPersonneByAge(ManagerRegistry $doctrine, $ageMin, $ageMax): Response
     {
         $repository = $doctrine->getRepository(Personne::class);
@@ -64,19 +64,36 @@ class PersonneController extends AbstractController
         ]);
     }
 
-    #[Route('/search', name: 'personne.search')]
-    public function search(Request $request, PersonneRepository $personneRepository): Response
+    #[Route('/search/{page?1}/{nbre?12}', name: 'personne.search')]
+    public function search(Request $request, PersonneRepository $personneRepository, int $page, int $nbre): Response
     {
         $querySearch = $request->query->get('searchQuery');
-        // dd($querySearch);
-         $personnes = $personneRepository->searchByName($querySearch);
+        //dd($querySearch);
+
+        //searchByName('a', 12 , 0)
+        $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
         //dd($querySearch);
         if ($querySearch === '') {
-            return $this->redirectToRoute('personne.list.all'); }
+            return $this->redirectToRoute('personne.list.all');
+        }
         if (empty($personnes)) {
             $this->addFlash('error', 'No results found for the search.');
         }
-        return $this->render('personne/index.html.twig', [ 'personnes' => $personnes, ]);
+        //countByName("a") = 83
+        $totalCount = $personneRepository->countByName($querySearch);
+        //dd($totalCount);
+        // ceil(83 / 12) = 7
+        $nbrePage = ceil($totalCount / $nbre);
+        //dd($nbrePage);
+
+        return $this->render('personne/index.html.twig', [
+            'personnes' => $personnes,
+            'isPaginated' => true,
+            'nbrePage' => $nbrePage,
+            'page' => $page,
+            'nbre' => $nbre,
+            'querySearch'=>$querySearch,
+        ]);
     }
 
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]

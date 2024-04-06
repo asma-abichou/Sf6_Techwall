@@ -6,19 +6,54 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
+                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                        <div class="card mb-4">
+                            <div class="container-fluid px-5">
+
+                                <div class="row mt-4">
+                                    <div class="col-xl-3 col-md-6">
+                                        <div class="card bg-primary text-white mb-4">
+                                            <div class="card-body">Santé <i class="fa-solid fa-stethoscope"></i></div>
+
+                                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                                <a class="small text-white stretched-link" href="{{ path('medecin.details') }}">View Details</a>
+                                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-3 col-md-6">
+                                        <div class="card bg-warning text-white mb-4">
+                                            <div class="card-body">Informatique <i class="fa-solid fa-computer"></i></div>
+                                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-3 col-md-6">
+                                        <div class="card bg-success text-white mb-4">
+                                            <div class="card-body">Administration <i class="fa-solid fa-user-tie"></i></div>
+                                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                         <h1 class="mt-4">Tables</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
                             <li class="breadcrumb-item active">Tables</li>
                         </ol>
 
-                        <div class="card mb-4">
+                        <div class="card mb-3">
                             <div class="card-header">
                                 <i class="fas fa-table me-1"></i>
                                 DataTable Example
                             </div>
                             <div class="card-body">
-                                <table id="datatablesSimple">
+                                <table id="datatablesSimple" class="table table-striped" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>First Name</th>
@@ -55,18 +90,6 @@
                         </div>
                     </div>
                 </main>
-                <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                            <div>
-                                <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
             </div>
 {% endblock %}
 {% block javascripts %}
