@@ -63,28 +63,70 @@ class PersonneController extends AbstractController
             'ageMax'=>$ageMax
         ]);
     }
+    #[Route('/list/{page<\d+>?1}/{nbre<\d+>?12}', name: 'personne.search')]
+    public function listOfPersonSearch(Request $request, PersonneRepository $personneRepository, int $page, int $nbre): Response
+    {
+        $query = trim($request->request->get('searchQuery'));
 
-    #[Route('/search/{page?1}/{nbre?12}', name: 'personne.search')]
+        /*if ($query === '') {
+            return $this->redirectToRoute('personne.list.all');
+        }*/
+
+        $personnes = $personneRepository->searchByName($query, $nbre, ($page - 1) * $nbre);
+
+        $totalCount = $personneRepository->countByName($query);
+
+        $nbrePage = ceil($totalCount / $nbre);
+        //dd($nbrePage);
+        $totalSearchResult = $totalCount;
+
+        if (empty($personnes)) {
+            $this->addFlash('error', 'No results found for the search.');
+        }
+
+        return $this->render('personne/index.html.twig', [
+            'personnes' => $personnes,
+            'isPaginated' => true,
+            'nbrePage' => $nbrePage,
+            'page' => $page,
+            'nbre' => $nbre,
+            'totalSearchResult' => $totalSearchResult,
+            'querySearch' => $query,
+        ]);
+    }
+    #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
+    public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
+    {
+        $repository = $doctrine->getRepository(Personne::class);
+        $nbPersonne = $repository->count([]);
+        $nbrePage = ceil($nbPersonne / $nbre);
+        $personnes = $repository->findBy([], [], $nbre, ($page - 1) * $nbre);
+        return $this->render('personne/list.html.twig', [
+            'personnes' => $personnes,
+            'isPaginated' => true,
+            'nbrePage' => $nbrePage,
+            'page' => $page,
+            'nbre' => $nbre,
+        ]);
+    }
+
+
+    /*#[Route('/search/{page?1}/{nbre?12}', name: 'personne.search')]
     public function search(Request $request, PersonneRepository $personneRepository, int $page, int $nbre): Response
     {
         $querySearch = $request->query->get('searchQuery');
-        //dd($querySearch);
-
-        //searchByName('a', 12 , 0)
+        dd($querySearch);
         $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
-        //dd($querySearch);
         if ($querySearch === '') {
             return $this->redirectToRoute('personne.list.all');
         }
         if (empty($personnes)) {
             $this->addFlash('error', 'No results found for the search.');
         }
-        //countByName("a") = 83
+        //dd($querySearch);
         $totalCount = $personneRepository->countByName($querySearch);
         //dd($totalCount);
-        // ceil(83 / 12) = 7
         $nbrePage = ceil($totalCount / $nbre);
-        //dd($nbrePage);
 
         return $this->render('personne/index.html.twig', [
             'personnes' => $personnes,
@@ -93,24 +135,27 @@ class PersonneController extends AbstractController
             'page' => $page,
             'nbre' => $nbre,
             'querySearch'=>$querySearch,
-        ]);
-    }
 
-    #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
-    public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
+        ]);
+    }*/
+
+
+  /*  #[Route('/list', name: 'people_list')]
+    public function list(PersonneRepository $personneRepository): Response
     {
-        $repository = $doctrine->getRepository(Personne::class);
-        $nbPersonne = $repository->count([]);
-        $nbrePage = ceil($nbPersonne / $nbre);
-        $personnes = $repository->findBy([], [], $nbre, ($page - 1) * $nbre);
+        $allPersons = $personneRepository->findAll();
+        $numberOfPersonsPerPage = 12;
+        $numberOfPages = (int)ceil(count($allPersons) / $numberOfPersonsPerPage);
+        //dd($numberOfPages);
+
         return $this->render('personne/index.html.twig', [
-            'personnes' => $personnes,
+            'personnes' => $allPersons,
             'isPaginated' => true,
-            'nbrePage' => $nbrePage,
+            'nbrePage' => $numberOfPages,
             'page' => $page,
             'nbre' => $nbre
         ]);
-    }
+    }*/
 
     #[Route('/{id<\d+>}', name: 'personne.detail')]
     public function detail(Personne $personne = null): Response

@@ -61,13 +61,10 @@ class PersonneRepository extends ServiceEntityRepository
             ->select('COUNT(p)')
             ->where('p.firstName LIKE :name OR p.lastName LIKE :name')
             ->setParameter('name', '%'.$name.'%');
-    // Execute the query and retrieve the single scalar result representing the count of matching records
-        $count =  $qb->getQuery()->getSingleScalarResult();
-        if ($count === 0) {
-            return null;
-        }
-        return $count;
+         // Execute the query and retrieve the single scalar result representing the count of matching records
+        return $qb->getQuery()->getSingleScalarResult();
     }
+
 //    public function findOneBySomeField($value): ?Personne
 //    {
 //        return $this->createQueryBuilder('p')
