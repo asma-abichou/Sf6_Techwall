@@ -6,8 +6,9 @@
 
 {% block body %}
 <div class="row">
-    <div class="row mt-2">
-        <p class="text-primary font-weight-bold">Total : {{ totalSearchResult }}</p>
+ <div class="row mt-2">
+        <p class="text-primary font-weight-bold">Total: {{ totalSearchResult }}</p>
+        <p class="text-primary font-weight-bold">Results on this page: {{ personnes|length }}</p>
     </div>
     {% for personne in personnes %}
         <div class="card" style="width: 18rem;">
@@ -23,35 +24,33 @@
             </div>
         </div>
     {% endfor %}
-</div>
-    {% if isPaginated is defined and isPaginated %}
-        <div class="row mt-2">
-            <nav aria-label="col Page navigation example">
-                {% if personnes is not empty %}
-                    <ul class="pagination">
-                        {% if page != 1 %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ path('personne.search', {'page': page - 1, 'nbre': nbre, 'searchQuery': querySearch}) }}">{{ 'Previous' }}</a>
-                            </li>
-                        {% endif %}
+ {% if isPaginated is defined and isPaginated %}
+    <div class="row mt-2">
+        <nav aria-label="col Page navigation example">
+            {% if personnes is not empty %}
+                <ul class="pagination">
+                    {% if page != 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ path('personne.search', {page: page - 1, nbre: nbre, 'searchQuery': querySearch}) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    {% for i in 1 .. nbrePage %}
+                        {% set isActive = (i == page) %}
+                        <li class="page-item{% if isActive %} active{% endif %}">
+                            <a class="page-link" href="{{ path('personne.search', {page: i, 'nbre': nbre, 'searchQuery': querySearch}) }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if page != nbrePage %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ path('personne.search', {page: page + 1, nbre: nbre, 'searchQuery': querySearch}) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </nav>
+    </div>
+{% endif %}
 
-                        {% for i in range(1, nbrePage) %}
-                            {% set isActive = (i == page) %}
-                            <li class="page-item{% if isActive %} active{% endif %}">
-                                <a class="page-link" href="{{ path('personne.search', {'page': i, 'nbre': nbre, 'searchQuery': querySearch}) }}">{{ i }}</a>
-                            </li>
-                        {% endfor %}
-
-                        {% if page != nbrePage %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ path('personne.search', {'page': page + 1, 'nbre': nbre, 'searchQuery': querySearch}) }}">{{ 'Next' }}</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                {% endif %}
-            </nav>
-        </div>
-    {% endif %}
 {% endblock %}
 
 {% block javascripts %}

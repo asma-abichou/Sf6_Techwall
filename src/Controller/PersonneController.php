@@ -7,7 +7,9 @@ use App\Form\PersonneType;
 use App\Repository\PersonneRepository;
 use App\Service\Helpers;
 use App\Service\PdfService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -63,37 +65,35 @@ class PersonneController extends AbstractController
             'ageMax'=>$ageMax
         ]);
     }
-    #[Route('/list/{page<\d+>?1}/{nbre<\d+>?12}', name: 'personne.search')]
-    public function listOfPersonSearch(Request $request, PersonneRepository $personneRepository, int $page, int $nbre): Response
+    #[Route('/search/{page?1}/{nbre?24}', name: 'personne.search', methods: ['POST','GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function search(PersonneRepository $personneRepository, Request $request, $page, $nbre = 24): Response
     {
-        $query = trim($request->request->get('searchQuery'));
+        $querySearch = trim($request->get('searchQuery', ''));
+       // dd($querySearch);
+        $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
 
-        /*if ($query === '') {
+        if ($querySearch === '') {
             return $this->redirectToRoute('personne.list.all');
-        }*/
-
-        $personnes = $personneRepository->searchByName($query, $nbre, ($page - 1) * $nbre);
-
-        $totalCount = $personneRepository->countByName($query);
-
-        $nbrePage = ceil($totalCount / $nbre);
-        //dd($nbrePage);
-        $totalSearchResult = $totalCount;
-
+        }
         if (empty($personnes)) {
             $this->addFlash('error', 'No results found for the search.');
         }
+        //dd($querySearch);
+        $totalCount = $personneRepository->countByName($querySearch);
+        //dd($totalCount);
+        $nbrePage = ceil($totalCount / $nbre);
+            return $this->render('personne/index.html.twig', [
+                'personnes' => $personnes,
+                'isPaginated' => true,
+                'nbrePage' => $nbrePage,
+                'page' => $page,
+                'nbre' => $nbre,
+                'totalSearchResult' => $totalCount,
+                'querySearch'=>$querySearch,
+            ]);
+        }
 
-        return $this->render('personne/index.html.twig', [
-            'personnes' => $personnes,
-            'isPaginated' => true,
-            'nbrePage' => $nbrePage,
-            'page' => $page,
-            'nbre' => $nbre,
-            'totalSearchResult' => $totalSearchResult,
-            'querySearch' => $query,
-        ]);
-    }
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {
@@ -107,38 +107,9 @@ class PersonneController extends AbstractController
             'nbrePage' => $nbrePage,
             'page' => $page,
             'nbre' => $nbre,
+
         ]);
     }
-
-
-    /*#[Route('/search/{page?1}/{nbre?12}', name: 'personne.search')]
-    public function search(Request $request, PersonneRepository $personneRepository, int $page, int $nbre): Response
-    {
-        $querySearch = $request->query->get('searchQuery');
-        dd($querySearch);
-        $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
-        if ($querySearch === '') {
-            return $this->redirectToRoute('personne.list.all');
-        }
-        if (empty($personnes)) {
-            $this->addFlash('error', 'No results found for the search.');
-        }
-        //dd($querySearch);
-        $totalCount = $personneRepository->countByName($querySearch);
-        //dd($totalCount);
-        $nbrePage = ceil($totalCount / $nbre);
-
-        return $this->render('personne/index.html.twig', [
-            'personnes' => $personnes,
-            'isPaginated' => true,
-            'nbrePage' => $nbrePage,
-            'page' => $page,
-            'nbre' => $nbre,
-            'querySearch'=>$querySearch,
-
-        ]);
-    }*/
-
 
   /*  #[Route('/list', name: 'people_list')]
     public function list(PersonneRepository $personneRepository): Response
