@@ -65,17 +65,16 @@ class PersonneController extends AbstractController
             'ageMax'=>$ageMax
         ]);
     }
-    #[Route('/search/{page?1}/{nbre?24}', name: 'personne.search', methods: ['POST','GET'])]
+    #[Route('/search/{page?1}/{nbre?24}', name: 'personne.search', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
     public function search(PersonneRepository $personneRepository, Request $request, $page, $nbre = 24): Response
     {
-        $querySearch = trim($request->get('searchQuery', ''));
-       // dd($querySearch);
-        $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
-
+        $querySearch = trim($request->query->get('searchQuery', ''));
         if ($querySearch === '') {
             return $this->redirectToRoute('personne.list.all');
         }
+        //dd($querySearch);
+        $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
         if (empty($personnes)) {
             $this->addFlash('error', 'No results found for the search.');
         }
