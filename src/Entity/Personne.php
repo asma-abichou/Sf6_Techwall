@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -20,17 +21,21 @@ class Personne
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['show_person'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: "Veuillez renseigner ce champ")]
     #[Assert\Length(min: 3, minMessage: "Veuillez avoir au moins 4 caractéres")]
+    #[Groups(['show_person'])]
     private ?string $firstName = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['show_person'])]
     private ?int $age = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['show_person'])]
     private ?string $lastName = null;
 
     #[ORM\OneToOne(targetEntity: Profile::class ,inversedBy: 'personne', cascade: ['persist', 'remove'])]

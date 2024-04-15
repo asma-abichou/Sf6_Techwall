@@ -11,7 +11,7 @@
         <p class="text-primary font-weight-bold">Results on this page: {{ personnes|length }}</p>
     </div>
     {% for personne in personnes %}
-        <div class="card" style="width: 18rem;">
+        <div class="card" style="width: 18rem;" id="searchResult">
             <div class="card-body">
                 <h5 class="card-title">{{ personne.lastName }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{{ personne.firstName }} {{ personne.lastName }}</h6>
@@ -53,28 +53,3 @@
 
 {% endblock %}
 
-{% block javascripts %}
-    <script>
-        $(document).ready(function() {
-            $('.select2').select2();
-        });
-    </script>
-    <script>
-        $('#person-search-input').on('keyup', function() {
-        let nameQuery = $(this).val();
-        //console.log(nameQuery);
-        fetch(`{{ path('search.persons') }}?nameQuery=${nameQuery}`)
-        .then(response => response.json())
-            .then(data => {
-              let personListHtml = '<div class="row">';
-              data.forEach(person => {
-                personListHtml += `<div class="card" style="width: 18rem;">`;
-              });
-              personListHtml += '</div>';
-              $('#person-list').html(personListHtml);
-            });
-        });
-    </script>
-
-
-{% endblock %}

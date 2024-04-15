@@ -7,9 +7,7 @@ use App\Form\PersonneType;
 use App\Repository\PersonneRepository;
 use App\Service\Helpers;
 use App\Service\PdfService;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,8 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
-use Doctrine\Common\Collections\Collection;
+
 
 #[Route('personne'), IsGranted('ROLE_USER')]
 class PersonneController extends AbstractController
@@ -93,17 +90,16 @@ class PersonneController extends AbstractController
                 'querySearch'=>$querySearch,
             ]);
         }
-    #[Route("/persons/search", name: "search.persons", methods: "GET")]
-    public function searchPersons(Request $request, PersonneRepository $personneRepository)
+    #[Route("/ajax/search", name: "search_persons_via_ajax", methods: "GET")]
+    public function searchPersonsViaAjax(Request $request, PersonneRepository $personneRepository): Response
     {
-        $name = trim($request->query->get('nameQuery',''));
-       // dd($name);
-        $persons = $personneRepository->searchByName($name);
-        $response = new JsonResponse();
-        $response->setData(array('persons' => $persons));
-        //dd($response);
-        return $response;
+        $searchQuery = $request->query->get('query');
+        $persons = $personneRepository->searchByName($searchQuery);
+        return $this->json($persons, 200, [], ["groups" => "show_person"]);
+        //dd($persons);
     }
+
+
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {

@@ -5,8 +5,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="row">
-
+<div class="row"  id="search-results" >
     {% for personne in personnes %}
         <div class="card" style="width: 18rem;">
             <div class="card-body">
@@ -23,7 +22,7 @@
     {% endfor %}
 </div>
     {% if isPaginated is defined and isPaginated %}
-        <div class="row mt-2">
+        <div class="row mt-2"  id="search-pagination" >
             <nav aria-label="col Page navigation example">
             {% if personnes is not empty %}
                 <ul class="pagination">
@@ -46,9 +45,39 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script>
-        $(document).ready(function() {
-            $('.select2').select2();
+<script>
+    $(document).ready(function() {
+        console.log("fi")
+        $('.select2').select2();
+        // Ajax search On key up
+        $('#ajaxSearchQuery').on('keyup', function() {
+            let nameQuery = $(this).val();
+            let searchPersonsAjaxRoute = `{{ path('search_persons_via_ajax') }}?query=${nameQuery}`;
+            console.log(searchPersonsAjaxRoute)
+            fetch(searchPersonsAjaxRoute)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    // we append the persons to the template using jQuery
+                    $('#search-results').empty();
+                    $('#search-pagination').remove();
+                    // we append the new search results
+                    data.forEach(persons => {
+                        $('#search-results').append(`
+                            <div class="card" style="width: 18rem;">
+                               <div class="card-body">
+                                    <h5 class="card-title">${persons.firstName}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">${persons.firstName} ${persons.lastName}</h6>
+                                    <p class="card-text">${persons.lastName}</p>
+                                    <p class="card-text">Age :${persons.age}</p>
+
+                                </div>
+                            </div>
+                        `);
+                    });
+                })
+                .catch(err => console.log(err))
         });
-    </script>
+    });
+</script>
 {% endblock %}
