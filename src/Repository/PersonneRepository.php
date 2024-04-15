@@ -54,14 +54,12 @@ class PersonneRepository extends ServiceEntityRepository
         // Execute the query and retrieve the single scalar result representing the count of matching records
         return $qb->getQuery()->getSingleScalarResult();
     }
-  public function searchByName($name, $limit  , $offset)
+  public function searchByName($name)
     {
 
         $qb = $this->createQueryBuilder('p')
             ->where('p.firstName LIKE :name OR p.lastName LIKE :name')
-            ->setParameter('name', '%'.$name.'%')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->setParameter('name', '%'.$name.'%');
         return $qb->getQuery()->getResult();
     }
 

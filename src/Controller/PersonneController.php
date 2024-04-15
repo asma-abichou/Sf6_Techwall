@@ -12,6 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Knp\Component\Pager\PaginatorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -92,7 +93,17 @@ class PersonneController extends AbstractController
                 'querySearch'=>$querySearch,
             ]);
         }
-
+    #[Route("/persons/search", name: "search.persons", methods: "GET")]
+    public function searchPersons(Request $request, PersonneRepository $personneRepository)
+    {
+        $name = trim($request->query->get('nameQuery',''));
+       // dd($name);
+        $persons = $personneRepository->searchByName($name);
+        $response = new JsonResponse();
+        $response->setData(array('persons' => $persons));
+        //dd($response);
+        return $response;
+    }
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response
     {
