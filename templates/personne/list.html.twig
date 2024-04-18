@@ -58,23 +58,31 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
-                    // we append the persons to the template using jQuery
-                    $('#search-results').empty();
-                    $('#search-pagination').remove();
-                    // we append the new search results
-                    data.forEach(persons => {
+                    if(data.length === 0){
+                        $('#search-results').append('<p class="search-not-found">Search Not Found</p>');
+                    }else {
+                        // we append the persons to the template using jQuery
+                        $('#search-results').empty();
+                        $('#search-pagination').remove();
+                        // we append the new search results
                         $('#search-results').append(`
+                             <div class="row mt-2">
+                                <p class="text-primary font-weight-bold">Total: ${data.length}</p>
+                            </div>`);
+
+                        data.forEach(persons => {
+                            $('#search-results').append(`
                             <div class="card" style="width: 18rem;">
                                <div class="card-body">
                                     <h5 class="card-title">${persons.firstName}</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">${persons.firstName} ${persons.lastName}</h6>
                                     <p class="card-text">${persons.lastName}</p>
                                     <p class="card-text">Age :${persons.age}</p>
-
                                 </div>
                             </div>
                         `);
-                    });
+                        });
+                    }
                 })
                 .catch(err => console.log(err))
         });

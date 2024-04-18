@@ -72,7 +72,7 @@ class PersonneController extends AbstractController
             return $this->redirectToRoute('personne.list.all');
         }
         //dd($querySearch);
-        $personnes = $personneRepository->searchByName($querySearch, $nbre, ($page - 1) * $nbre);
+        $personnes = $personneRepository->searchByNameWithPagination($querySearch, $nbre, ($page - 1) * $nbre);
         if (empty($personnes)) {
             $this->addFlash('error', 'No results found for the search.');
         }
