@@ -43,49 +43,88 @@
         </div>
     {% endif %}
 {% endblock %}
-
 {% block javascripts %}
 <script>
     $(document).ready(function() {
-        console.log("fi")
+        /*console.log("fi")*/
         $('.select2').select2();
         // Ajax search On key up
-        $('#ajaxSearchQuery').on('keyup', function() {
+        let page = 1; // Initialize the current page
+        const perPage = 14; // Number of results per page
+        $('#ajaxSearchQuery').on('keyup', function () {
             let nameQuery = $(this).val();
-            let searchPersonsAjaxRoute = `{{ path('search_persons_via_ajax') }}?query=${nameQuery}`;
-            console.log(searchPersonsAjaxRoute)
+            console.log(nameQuery);
+
+            fetchSearchResults(nameQuery, page);
+
+        });
+
+        function fetchSearchResults(nameQuery, page) {
+            let searchPersonsAjaxRoute = `{{ path('search_persons_via_ajax') }}?searchQuery=${nameQuery}&page=${page}&nbre=${perPage}`;
+            console.log(searchPersonsAjaxRoute);
             fetch(searchPersonsAjaxRoute)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
-                    if(data.length === 0){
-                        $('#search-results').append('<p class="search-not-found">Search Not Found</p>');
-                    }else {
-                        // we append the persons to the template using jQuery
+                    if (data.length === 0) {
+                        $('#search-results').html('<p class="search-not-found">Search Not Found</p>');
+                    } else {
+                        // Clear previous results
                         $('#search-results').empty();
                         $('#search-pagination').remove();
-                        // we append the new search results
+                        // Append the new search results
                         $('#search-results').append(`
-                             <div class="row mt-2">
-                                <p class="text-primary font-weight-bold">Total: ${data.length}</p>
-                            </div>`);
-
-                        data.forEach(persons => {
-                            $('#search-results').append(`
-                            <div class="card" style="width: 18rem;">
-                               <div class="card-body">
-                                    <h5 class="card-title">${persons.firstName}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">${persons.firstName} ${persons.lastName}</h6>
-                                    <p class="card-text">${persons.lastName}</p>
-                                    <p class="card-text">Age :${persons.age}</p>
-                                </div>
+                            <div class="row mt-2">
+                                <p class="text-primary font-weight-bold">Total: ${data.totalResults}</p>
                             </div>
-                        `);
-                        });
+                            `);
+                        if (Array.isArray(data.persons)) {
+                            data.persons.forEach(person => {
+                                $('#search-results').append(`
+                                <div class="card" style="width: 18rem;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${person.firstName}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">${person.firstName} ${person.lastName}</h6>
+                                        <p class="card-text">${person.lastName}</p>
+                                        <p class="card-text">Age: ${person.age}</p>
+                                    </div>
+                                </div>
+                            `);
+                            });
+                        } else {
+                            console.log('data.persons is not an array');
+                        }
+
+                        // Render pagination
+                        if (data.isPaginated) {
+                            renderPagination(data.nbrePage, data.page);
+                        }
                     }
+
                 })
-                .catch(err => console.log(err))
-        });
-    });
+
+                .catch(err => console.log(err));
+        }
+
+
+
+
+        function renderPagination(totalPages, currentPage) {
+            let paginationHtml = '<ul class="pagination">';
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
+                } else {
+                    paginationHtml += '<li class="page-item"><a class="page-link" href="#" onclick="changePage(' + i + ', \'' + $('#ajaxSearchQuery').val() + '\')">' + i + '</a></li>';
+                }
+            }
+            paginationHtml += '</ul>';
+            $('#search-results').append('<div id="search-pagination">' + paginationHtml + '</div>');
+        }
+        function changePage(pageNumber, searchQuery) {
+            page = pageNumber;
+            fetchSearchResults(searchQuery, page);
+        }
+    })
+
 </script>
 {% endblock %}

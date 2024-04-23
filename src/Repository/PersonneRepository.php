@@ -57,9 +57,10 @@ class PersonneRepository extends ServiceEntityRepository
   public function searchByName($name)
     {
         $qb = $this->createQueryBuilder('p')
+             ->select('COUNT(p.id)')
             ->where('p.firstName LIKE :name OR p.lastName LIKE :name')
             ->setParameter('name', '%'.$name.'%');
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     public function searchByNameWithPagination($name, $limit, $offset)

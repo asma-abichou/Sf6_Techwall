@@ -90,13 +90,29 @@ class PersonneController extends AbstractController
                 'querySearch'=>$querySearch,
             ]);
         }
-    #[Route("/ajax/search", name: "search_persons_via_ajax", methods: "GET")]
-    public function searchPersonsViaAjax(Request $request, PersonneRepository $personneRepository): Response
+
+    #[Route('/ajax/search/{page?1}/{nbre?24}', name: 'search_persons_via_ajax', methods: ['GET'])]
+    public function searchPersonsViaAjax(PersonneRepository $personneRepository, Request $request, $page, $nbre = 24): Response
     {
-        $searchQuery = $request->query->get('query');
-        $persons = $personneRepository->searchByName($searchQuery);
-        return $this->json($persons, 200, [], ["groups" => "show_person"]);
-        //dd($persons);
+        $querySearch = trim($request->query->get('searchQuery', ''));
+        $persons = $personneRepository->searchByNameWithPagination($querySearch, $nbre, ($page - 1) * $nbre);
+        $totalCount = $personneRepository->countByName($querySearch);
+       // dd($totalCount);
+        $nbrePage = ceil($totalCount / $nbre);
+        //return $this->json($persons, 200, [], ["groups" => "show_person"]);
+        $data = [
+            'persons' => $persons,
+            'nbrePage' => $nbrePage,
+            'isPaginated' =>true,
+            'page' => $page,
+            'nbre' => $nbre,
+            'totalResults' => $totalCount,
+            'currentPage' => $page,
+            'querySearch' => $querySearch,
+        ];
+
+        // Return the data as JSON response
+        return $this->json($data, 200, [], ["groups" => "show_person"] );
     }
 
 
