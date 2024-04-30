@@ -10,7 +10,6 @@ use App\Service\PdfService;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -91,30 +90,29 @@ class PersonneController extends AbstractController
             ]);
         }
 
-    #[Route('/ajax/search/{page?1}/{nbre?24}', name: 'search_persons_via_ajax', methods: ['GET'])]
-    public function searchPersonsViaAjax(PersonneRepository $personneRepository, Request $request, $page, $nbre = 24): Response
+    #[Route('/ajax/search/', name: 'search_persons_via_ajax', methods: ['GET'] )]
+    public function searchPersonsViaAjax(PersonneRepository $personneRepository, Request $request): Response
     {
+        $page = $request->query->getInt('page', 1);
+        $nbre = $request->query->getInt('nbre', 24);
         $querySearch = trim($request->query->get('searchQuery', ''));
         $persons = $personneRepository->searchByNameWithPagination($querySearch, $nbre, ($page - 1) * $nbre);
         $totalCount = $personneRepository->countByName($querySearch);
-       // dd($totalCount);
+
         $nbrePage = ceil($totalCount / $nbre);
-        //return $this->json($persons, 200, [], ["groups" => "show_person"]);
+
         $data = [
             'persons' => $persons,
             'nbrePage' => $nbrePage,
-            'isPaginated' =>true,
+            'isPaginated' => true,
             'page' => $page,
             'nbre' => $nbre,
             'totalResults' => $totalCount,
             'currentPage' => $page,
             'querySearch' => $querySearch,
         ];
-
-        // Return the data as JSON response
-        return $this->json($data, 200, [], ["groups" => "show_person"] );
+        return $this->json($data, 200, [], ["groups" => "show_person"]);
     }
-
 
     #[Route('/all/{page?1}/{nbre?12}', name: 'personne.list.all'), IsGranted('ROLE_USER')]
     public function indexall(ManagerRegistry $doctrine, $page, $nbre): Response

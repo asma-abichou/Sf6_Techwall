@@ -44,87 +44,80 @@
     {% endif %}
 {% endblock %}
 {% block javascripts %}
-<script>
-    $(document).ready(function() {
-        /*console.log("fi")*/
-        $('.select2').select2();
-        // Ajax search On key up
-        let page = 1; // Initialize the current page
-        const perPage = 14; // Number of results per page
-        $('#ajaxSearchQuery').on('keyup', function () {
-            let nameQuery = $(this).val();
-            console.log(nameQuery);
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+            let pageNum = 1; // Initialize pageNum
+            let perPage = 24;
 
-            fetchSearchResults(nameQuery, page);
+            $('#ajaxSearchQuery').on('keyup', function (e) {
+                e.preventDefault()
+                let nameQuery = $(this).val();
+                    pageNum = 1;
+                fetchSearchResults(nameQuery, pageNum, perPage);
+            });
 
-        });
+            $(document).on('click', '.pagination-link', function (e) {
+                e.preventDefault()
+                pageNum = $(this).data('page');
+                const nameQuery = $(this).data('query');
+                fetchSearchResults(nameQuery, pageNum, perPage);
+            });
+            function fetchSearchResults(nameQuery, pageNum, perPage) {
+                let searchPersonsAjaxRoute = `{{ path('search_persons_via_ajax') }}?searchQuery=${nameQuery}&page=${pageNum}&nbre=${perPage}`;
 
-        function fetchSearchResults(nameQuery, page) {
-            let searchPersonsAjaxRoute = `{{ path('search_persons_via_ajax') }}?searchQuery=${nameQuery}&page=${page}&nbre=${perPage}`;
-            console.log(searchPersonsAjaxRoute);
-            fetch(searchPersonsAjaxRoute)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        $('#search-results').html('<p class="search-not-found">Search Not Found</p>');
-                    } else {
-                        // Clear previous results
-                        $('#search-results').empty();
-                        $('#search-pagination').remove();
-                        // Append the new search results
-                        $('#search-results').append(`
-                            <div class="row mt-2">
-                                <p class="text-primary font-weight-bold">Total: ${data.totalResults}</p>
-                            </div>
-                            `);
-                        if (Array.isArray(data.persons)) {
-                            data.persons.forEach(person => {
-                                $('#search-results').append(`
-                                <div class="card" style="width: 18rem;">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${person.firstName}</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">${person.firstName} ${person.lastName}</h6>
-                                        <p class="card-text">${person.lastName}</p>
-                                        <p class="card-text">Age: ${person.age}</p>
-                                    </div>
-                                </div>
-                            `);
-                            });
-                        } else {
-                            console.log('data.persons is not an array');
-                        }
-
-                        // Render pagination
-                        if (data.isPaginated) {
-                            renderPagination(data.nbrePage, data.page);
-                        }
-                    }
-
-                })
-
-                .catch(err => console.log(err));
-        }
-
-
-
-
-        function renderPagination(totalPages, currentPage) {
-            let paginationHtml = '<ul class="pagination">';
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    paginationHtml += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
-                } else {
-                    paginationHtml += '<li class="page-item"><a class="page-link" href="#" onclick="changePage(' + i + ', \'' + $('#ajaxSearchQuery').val() + '\')">' + i + '</a></li>';
+                if (!nameQuery || nameQuery.length === 0) {
+                    return;
                 }
-            }
-            paginationHtml += '</ul>';
-            $('#search-results').append('<div id="search-pagination">' + paginationHtml + '</div>');
-        }
-        function changePage(pageNumber, searchQuery) {
-            page = pageNumber;
-            fetchSearchResults(searchQuery, page);
-        }
-    })
+                fetch(searchPersonsAjaxRoute)
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#search-results').empty();
+                        $('#search-pagination').empty(); // Empty pagination container
 
-</script>
+                        // Handle no results
+                        if (data.totalResults == 0) {
+                            $('#search-results').append('<p class="search-not-found">Search Not Found</p>');
+                            return;
+                        }
+
+                        // Display results
+                        $('#search-results').append(`<div class="row mt-2"><p class="text-primary font-weight-bold">Total: ${data.totalResults}</p></div>`);
+                        data.persons.forEach(person => {
+                            $('#search-results').append(`
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">${person.firstName}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">${person.firstName} ${person.lastName}</h6>
+                                <p class="card-text">${person.lastName}</p>
+                                <p class="card-text">Age: ${person.age}</p>
+                            </div>
+                        </div>
+                    `);
+                        });
+
+                        // Render pagination if total results more than per page
+                        if (data.totalResults >= perPage) {
+                            renderPagination(perPage, data.totalResults, pageNum, nameQuery);
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
+
+            function renderPagination(perPage, totalResults, currentPage, nameQuery) {
+                let totalPages = Math.ceil(totalResults / perPage);
+                let paginationHtml = '<nav aria-label="Page navigation"><ul class="pagination">';
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += (i === currentPage) ?
+                        `<li class="page-item active"><span class="page-link">${i}</span></li>` :
+                        `<li class="page-item"><a class="page-link pagination-link" href="#" data-page="${i}" data-query="${nameQuery}">${i}</a></li>`;
+                }
+                paginationHtml += '</ul></nav>';
+                $('#search-pagination').append(paginationHtml);
+            }
+        });
+    </script>
+
 {% endblock %}
